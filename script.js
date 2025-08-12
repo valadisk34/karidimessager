@@ -110,26 +110,3 @@ function confirmDelete() {
     closeDeletePopup();
   });
 }
-
-function loadMessages() {
-  fetch(serverURL)
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("messages");
-      
-      // Ελέγχουμε αν ο χρήστης είναι κολλημένος κάτω (εντός 50px από το κάτω μέρος)
-      const isAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 50;
-      
-      container.innerHTML = "";
-      data.forEach(row => {
-        let time = new Date(row[0]).toLocaleTimeString();
-        container.innerHTML += `<div class="message"><b>${row[1]}</b>: ${row[2]} <small>${time}</small></div>`;
-      });
-      
-      // Αν ήταν κολλημένος κάτω, κάνουμε scroll κάτω, αλλιώς αφήνουμε την θέση του scroll όπως ήταν
-      if (isAtBottom) {
-        container.scrollTop = container.scrollHeight;
-      }
-    });
-}
-
