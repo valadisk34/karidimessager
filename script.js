@@ -1,147 +1,188 @@
-const serverURL = "https://script.google.com/macros/s/AKfycbzj3wCVyexztfrMt53OaGknZH2yVCW-YGXxOSlj4MT8ZoqpRAg9V56L6egjrtoa4ToqxQ/exec";
-let currentUser = null;
-
-function showNotification(message) {
-  const notification = document.getElementById("notification");
-  notification.textContent = message;
-  notification.style.display = "block";
-  setTimeout(() => {
-    notification.style.display = "none";
-  }, 3000);
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-function login() {
-  const username = document.getElementById("loginUsername").value;
-  const password = document.getElementById("loginPassword").value;
-
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify({action:"login", username, password})
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      currentUser = {username, password};
-      document.getElementById("login").style.display = "none";
-      document.getElementById("chat").style.display = "flex";
-      loadMessages();
-    } else {
-      showNotification("Λάθος στοιχεία!");
-    }
-  });
+.container {
+  width: 400px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-function register() {
-  const username = document.getElementById("loginUsername").value;
-  const password = document.getElementById("loginPassword").value;
-
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify({action:"register", username, password})
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      showNotification("Εγγραφήκατε επιτυχώς, κάντε login!");
-    } else {
-      showNotification(data.message || "Σφάλμα στην εγγραφή.");
-    }
-  });
+.login-container {
+  padding: 20px;
 }
 
-function loadMessages() {
-  if (!currentUser) return;
-  fetch(`${serverURL}?username=${currentUser.username}&password=${currentUser.password}`)
-    .then(res => res.json())
-    .then(data => {
-      const container = document.getElementById("messages");
-      container.innerHTML = "";
-      if (!Array.isArray(data)) {
-        container.innerHTML = `<p style="text-align:center; color:gray;">Please login to send and view messages.</p>`;
-        return;
-      }
-      data.forEach(row => {
-        let time = new Date(row[0]).toLocaleString(); // ημερομηνία + ώρα
-        container.innerHTML += `<div class="message"><b>${row[1]}</b>: ${row[2]} <small>${time}</small> <span class="delete-circle" onclick="deleteMessage('${row[3]}')">🔴</span></div>`;
-      });
-      container.scrollTop = container.scrollHeight;
-    });
+.login-container h2 {
+  margin-top: 0;
+  color: #333;
 }
 
-function sendMessage() {
-  if (!currentUser) return;
-  const message = document.getElementById("message").value;
-  if (!message) {
-    showNotification("Παρακαλώ εισάγετε μήνυμα");
-    return;
-  }
-
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify({
-      username: currentUser.username,
-      password: currentUser.password,
-      message
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      document.getElementById("message").value = "";
-      loadMessages();
-    } else {
-      showNotification("Λάθος στοιχεία!");
-    }
-  });
+.input-group {
+  margin-bottom: 15px;
 }
 
-function deleteMessage(id) {
-  if (!currentUser) return;
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify({
-      action:"deleteMessage",
-      username: currentUser.username,
-      password: currentUser.password,
-      id
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      showNotification("Μήνυμα διαγράφηκε");
-      loadMessages();
-    } else {
-      showNotification("Δεν μπορεί να διαγραφεί.");
-    }
-  });
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 80px;
+  box-sizing: border-box;
 }
 
-setInterval(loadMessages, 3000);
-
-// Emergency Delete Popup
-document.querySelector(".delete-btn").addEventListener("click", () => {
-  document.getElementById("deletePopup").style.display = "flex";
-});
-
-function closeDeletePopup() {
-  document.getElementById("deletePopup").style.display = "none";
+button {
+  background-color: #000000;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 80px;
+  cursor: pointer;
+  width: 100%;
 }
 
-function confirmDelete() {
-  const pass = document.getElementById("deletePassword").value;
-  fetch(serverURL, {
-    method: "POST",
-    body: JSON.stringify({action: "emergencyDelete", password: pass})
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.status === "success") {
-      alert("Η συνομιλία διαγράφηκε, ο κωδικός άλλαξε και η συνομιλία κλειδώθηκε.");
-      location.reload();
-    } else {
-      showNotification("Λάθος κωδικός!");
-    }
-    closeDeletePopup();
-  });
+button:hover {
+  background-color: green;
+}
+
+.chat-container {
+  display: none;
+  height: 500px;
+  flex-direction: column;
+}
+
+.chat-header {
+  background-color: #000000;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background-color: rgb(0, 128, 255);
+  border-radius: 100px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message b {
+  color: #ffffff;
+}
+
+.message small {
+  color: #ffffff;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+.chat-input {
+  padding: 15px;
+  border-top: 1px solid #ddd;
+  background-color: white;
+}
+
+.input-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.input-row input {
+  flex: 1;
+  margin-right: 10px;
+}
+
+#message {
+  width: 85%;
+}
+
+.send-btn {
+  width: 15% !important;
+  padding: 10px 5px !important;
+}
+
+.delete-btn {
+  background-color: #e74c3c;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.delete-btn:hover {
+  background-color: #c0392b;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e74c3c;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  display: none;
+  z-index: 1000;
+}
+
+/* Popup overlay */
+#deletePopup {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+#deletePopup .popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background-color: rgb(0, 128, 255);
+  border-radius: 100px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.message b {
+  color: #ffffff;
+}
+
+.message small {
+  color: #ffffff;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+.delete-circle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
