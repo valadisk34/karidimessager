@@ -159,3 +159,30 @@ button:hover {
   width: 400px;
   text-align: center;
 }
+
+.message {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background-color: rgb(0, 128, 255);
+  border-radius: 100px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.message b {
+  color: #ffffff;
+}
+
+.message small {
+  color: #ffffff;
+  font-size: 0.8em;
+  margin-left: 5px;
+}
+
+.delete-circle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
